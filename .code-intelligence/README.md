@@ -7,6 +7,8 @@ web application security lessons.
 It is a demonstration of common server-side application flaws and is
 intended to be used by people to learn about application security and penetration testing techniques.
 
+For more info on WebGoat click [here](https://owasp.org/www-project-webgoat/).
+
 ## The problem
 
 Although this is an example application, the type of application, web application, is actually very common.
