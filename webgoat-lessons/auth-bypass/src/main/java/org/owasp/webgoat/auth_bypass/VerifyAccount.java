@@ -42,6 +42,15 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/** for detecting authentication bypass with fuzzing */
+class AuthBypassException extends Exception
+{
+  public AuthBypassException(String message)
+  {
+    super(message);
+  }
+}
+
 /**
  * Created by jason on 1/5/17.
  */
@@ -57,9 +66,10 @@ public class VerifyAccount extends AssignmentEndpoint {
 
     @PostMapping(path = "/auth-bypass/verify-account", produces = {"application/json"})
     @ResponseBody
-    public AttackResult completed(@RequestParam String userId, @RequestParam String verifyMethod, HttpServletRequest req) throws ServletException, IOException {
+    public AttackResult completed(@RequestParam String userId, @RequestParam String verifyMethod, HttpServletRequest req) throws ServletException, IOException, AuthBypassException {
         AccountVerificationHelper verificationHelper = new AccountVerificationHelper();
         Map<String, String> submittedAnswers = parseSecQuestions(req);
+        
         if (verificationHelper.didUserLikelylCheat((HashMap) submittedAnswers)) {
             return trackProgress(failed()
                     .feedback("verify-account.cheated")
@@ -70,9 +80,10 @@ public class VerifyAccount extends AssignmentEndpoint {
         // else
         if (verificationHelper.verifyAccount(new Integer(userId), (HashMap) submittedAnswers)) {
             userSessionData.setValue("account-verified-id", userId);
-            return trackProgress(success()
-                    .feedback("verify-account.success")
-                    .build());
+            throw new AuthBypassException("Found authentication bypass in account verification");
+            //return trackProgress(success()
+              //      .feedback("verify-account.success")
+                //    .build());
         } else {
             return trackProgress(failed()
                     .feedback("verify-account.failed")
